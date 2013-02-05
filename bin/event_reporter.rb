@@ -1,18 +1,32 @@
 
-  require 'csv'
-  require 'date'
+require 'csv'
+require 'date'
 
 class EventReporter
 
-    def initialize
+  def initialize
     @people = []
     @list = []
     @queue = []
     @contents = CSV.open('event_attendees.csv', headers: true, header_converters: :symbol )
   end
 
+  def clean_zipcode(zipcode)
+    zipcode.to_s.rjust(5,"0")[0..4]
+  end
 
- def parse_file
+  def clean_phone(dirty_phone)
+    phone = dirty_phone.scan(/[0-9]/).join 
+    if phone.length  == 10
+      "(#{phone[0..2]})#{phone[3..5]}-#{phone[6..9]}"
+    elsif phone.length ==11 && phone[0]==1
+      "(#{phone[1..3]})#{phone[4..6]}-#{phone[7..10]}"
+    else
+      "(000)000-0000" 
+    end
+  end
+
+  def parse_file
     @contents.each do |row|
       person = {}
       person[:id] = row[0]
@@ -20,15 +34,14 @@ class EventReporter
       person[:first_name] = row[:first_name].downcase
       person[:last_name] = row[:last_name].downcase
       person[:email] = row[:email_address].downcase
-      person[:phone] = row[:homephone]
+      person[:phone] = clean_phone(row[:homephone])
       person[:street] = row[:street]
       person[:city] = row[:city]
       person[:state] = row[:state]
-      person[:zipcode] = row[:zipcode]
-      person[:phone] = row[:homephone]
+      person[:zipcode] = clean_zipcode(row[:zipcode])
       @people << person 
     end
-    puts "Loaded #{@people.count} Records..." 
+    puts "Loaded loaded loaded #{@people.count} Records..." 
   end
 
   def define_file_name(user_input)
@@ -41,22 +54,28 @@ class EventReporter
     end
   end
 
+  def print_queue
+    puts "LAST NAME  FIRST NAME  EMAIL  ZIPCODE  CITY  STATE  ADDRESS  PHONE"
+    @queue.each do |person|
+      puts "#{person[:last_name].ljust(15," ")}\t #{person[:first_name].ljust(5," ")}\t #{person[:email].ljust(42," ")}\t #{person[:zipcode]}\t#{person[:city].ljust(26," ")}\t#{person[:state]}\t#{person[:street].ljust(40," ")}\t#{person[:phone]}"
+    end
+  end
 
-
-def queue(input)
+  def queue(input)
     parts = input.split
     command = parts[0]
     case command
-  # when 'help' then puts "\n Run 'queue count' to show number of items in queue. \n Run 'queue clear' to clear the items in the queue."
     when 'count' then puts @queue.count
-    when 'clear' then puts "Queue Cleared..."
-    when 'print' then puts 'puts queue print'
+    when 'clear' 
+    puts "Queue Cleared..."
+    @queue = []
+    when 'print' then print_queue
     when 'save' then puts 'puts queue save'
-    when 'print' then puts 'puts print by last name'
+    when 'print by' then puts 'puts print by last name'
     else
       puts "What would you like to queue?"
     end
-end
+  end
 
 def find_first_name(input)
   @queue = @people.select{|key,value| key[:first_name]==input}
@@ -64,7 +83,7 @@ def find_first_name(input)
 end
 
 def find_last_name(input)
-@queue = @people.select{|key,value| key[:last_name]==input}
+  @queue = @people.select{|key,value| key[:last_name]==input}
   puts "Found #{@queue.count} records"
 end
 
@@ -74,12 +93,12 @@ def find_by_city(input)
 end
 
 def find_by_state(input)
-@queue = @people.select{|key,value| key[:state]==input}
+  @queue = @people.select{|key,value| key[:state]==input}
   puts "Found #{@queue.count} records"
 end
 
 def find_by_zip(input)
-@queue = @people.select{|key,value| key[:zipcode]==input}
+  @queue = @people.select{|key,value| key[:zipcode]==input}
   puts "Found #{@queue.count} records"
 end
 
@@ -99,8 +118,17 @@ def find(input)
   end
 end
 
+def show_help(input)
+ parts = input.split
+ command = parts[0]
+ case command
+ when 'load' then puts "Enter 'load <filename.csv>' to load records from a new file."
+ when 'find' then puts "Enter 'find <attribute> <criteria>' to load records into the Queue. \n Example: 'find first_name sarah' "
+ when 'queue' then puts "Enter 'queue print' to print the queue. \n Enter 'queue clear' to clear the queue. \n"
+ end
+end
 
-def run
+ def run
   command = ""
   while command != "quit"
     printf "enter command: "
@@ -111,18 +139,13 @@ def run
     when 'quit' then puts "Goodbye!"
     when 'load' then parse_file
     when 'find' then find(parts[1..-1].join(" "))
-  when 'queue' then queue(parts[1..-1].join(" "))
-      # when 'queue count' then tweet(parts[1..-1].join(" "))
-      # when 'dm' then dm(parts[1], parts[2..-1].join(" "))
-      # when 'spam' then spam_my_followers(parts[1..-1].join(" "))
-      # when 'elt' then everyones_last_tweet
-      # when 'klout' then klout_score
-      # when 'turl' then tweet(parts[1..-2].join(" ") + " " + shorten(parts[-1]))
+    when 'queue' then queue(parts[1..-1].join(" "))
+    when 'help' then show_help(parts[1..-1].join(" "))
     else
      puts "Sorry, I don't know how to #{command}."
-   end
+    end
 
- end
+  end
 
-end
+  end
 end
