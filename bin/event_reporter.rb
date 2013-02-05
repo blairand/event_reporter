@@ -78,15 +78,16 @@ class EventReporter
     if input == "print"
       puts header
       @queue.each do |person|
-        puts "#{person[:last_name].ljust(15," ")}\t #{person[:first_name].ljust(5," ")}\t #{person[:email].ljust(42," ")}\t #{person[:zipcode]}\t#{person[:city].ljust(26," ")}\t#{person[:state]}\t#{person[:street].ljust(40," ")}\t#{person[:phone]}"
+        puts "#{person[:last_name].ljust(10," ")}\t #{person[:first_name].ljust(5," ")}\t #{person[:email].ljust(42," ")}\t #{person[:zipcode]}\t#{person[:city].ljust(26," ")}\t#{person[:state].upcase}\t#{person[:street].to_s.ljust(20," ")}\t#{person[:phone]}"
       end
     else
       puts header
       sorted = @queue.sort_by{|person| person[input.to_sym]}
       sorted.each do |person|
-        puts "#{person[:last_name].ljust(15," ")}\t #{person[:first_name].ljust(5," ")}\t #{person[:email].ljust(42," ")}\t #{person[:zipcode]}\t#{person[:city].ljust(26," ")}\t#{person[:state]}\t#{person[:street].ljust(40," ")}\t#{person[:phone]}"
+        puts "#{person[:last_name].ljust(15," ")}\t #{person[:first_name].ljust(5," ")}\t #{person[:email].ljust(42," ")}\t #{person[:zipcode]}\t#{person[:city].ljust(26," ")}\t#{person[:state]}\t#{person[:street].to_s.ljust(20," ")}\t#{person[:phone]}"
       end
     end
+    puts "\n\n\n\n"
   end
 
 def save_to(input,queue)
