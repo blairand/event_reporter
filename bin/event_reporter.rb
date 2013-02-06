@@ -13,100 +13,9 @@ class EventReporter
     @contents = ""
   end
 
-  def clean_zipcode(zipcode)
-    zipcode.to_s.rjust(5,"0")[0..4]
-  end
-
-  def clean_phone(dirty_phone)
-    phone = dirty_phone.scan(/[0-9]/).join 
-    if phone.length  == 10
-      "(#{phone[0..2]})#{phone[3..5]}-#{phone[6..9]}"
-    elsif phone.length ==11 && phone[0]==1
-      "(#{phone[1..3]})#{phone[4..6]}-#{phone[7..10]}"
-    else
-      "(000)000-0000" 
-    end
-  end
-  
-  def clean_city(dirty_city)
-    dirty_city.to_s.downcase
-  end
-  
-  def clean_state(dirty_state)
-    dirty_state.to_s.downcase
-  end
-  
-  def clean_reg_date
-    #cleanup the reg date?
-  end
-
-  def clean_street(dirty_street)
-    dirty_street.to_s.downcase
-  end
-
-  def clean_email(dirty_email)
-    dirty_email.downcase
-  end
-
-  def clean_last_name(dirty_last_name)
-    dirty_last_name.to_s.downcase
-  end
-
-  def clean_first_name(dirty_first_name)
-    dirty_first_name.to_s.downcase
-  end
-  
-
-  def parse_file(filename)
-    @people = []
-    @contents.each do |row|
-      person = {}
-      person[:id] = row[0]
-      person[:regdate] = row[:regdate]
-      person[:first_name] = clean_first_name(row[:first_name])
-      person[:last_name] = clean_last_name(row[:last_name])
-      person[:email] = clean_email(row[:email_address])
-      person[:phone] = clean_phone(row[:homephone])
-      person[:street] = clean_street(row[:street])
-      person[:city] = clean_city(row[:city])
-      person[:state] = clean_state(row[:state])
-      person[:zipcode] = clean_zipcode(row[:zipcode])
-      @people << person 
-    end
-    puts "Loaded #{@people.count} Records from '#{filename}'..." 
-  end
-
-  def define_file_name(user_input)
-    if user_input[-4..-1] == ".csv" && File.exist?(user_input)
-      filename = user_input
-    elsif user_input == "load"
-      puts"Loading Default File"
-      filename="event_attendees.csv"
-    else 
-      puts "Bro, that is not a CSV or i cannot find the file...\n \n Loading Default File."
-      filename="event_attendees.csv"
-    end
-    @contents = CSV.open(filename, headers: true, header_converters: :symbol )
-    parse_file(filename)
-  end
-
   def queue_print(input)    
     header = "LAST NAME  FIRST NAME  EMAIL  ZIPCODE  CITY  STATE  ADDRESS  PHONE"
     if input == "print"
-      # @queue.max do |person|
-      # id_ljust = person[:id]
-      # person[:regdate]
-      # person[:first_name]
-      # person[:last_name]
-      # person[:email]
-      # person[:phone]
-      # person[:street]
-      # person[:city]
-      # person[:state]
-      # person[:zipcode] 
-
-      # end
-
 
       puts header
       @queue.each do |person|
@@ -180,17 +89,49 @@ def find(input)
   end
 end
 
-def show_help(input)
- parts = input.split
- command = parts[0]
- case command
- when 'load' then puts "Enter 'load <filename.csv>' to load records from a new file."
- when 'find' then puts "Enter 'find <attribute> <criteria>' to load records into the Queue. \n Example: 'find first_name sarah' "
- when 'queue' then puts "Enter 'queue print' to print the queue. \n Enter 'queue clear' to clear the queue. \n"
- else 
-   puts "What would you like help with? \n 'load <filename.csv'> to input records\n 'find first_name sarah' to find people named sarah. \n 'queue print' to print out all records in the queue.\n "
- end
+class HelpText
+  def initialize
+   @command = ""
+  end
+
+def help_queue(input)
+   parts = input.split
+    @command = parts[0]
+   case @command
+   when 'count' then puts "\n\n\n\n\tHelp Queue Count 'queue print' to print the queue. \n Enter 'queue clear' to clear the queue. \n"
+   when 'clear' then puts "\n\n\n\n\tEnter 'queue print' to print the queue. \n Enter 'queue clear' to clear the queue. \n"
+   when 'print' then puts "\n\n\n\nEnter 'queue print' to print the queue. \n Enter 'queue clear' to clear the queue. \n"
+   else
 end
+end
+
+
+  def show_help(input) 
+    parts = input.split
+    @command = parts[0]
+   case @command
+   when 'load' then puts "Enter 'load <filename.csv>' to load records from a new file."
+   when 'find' then puts "Enter 'find <attribute> <criteria>' to load records into the Queue. \n Example: 'find first_name sarah' "
+   when 'queue' 
+    help_queue(parts[1..-1].join(" "))
+   else 
+     puts "#{'-'*100}\n\n\n\nWhat would you like help with? \n\tload <filename.csv'> to input records\n\t Enter 'find first_name sarah' to find people named sarah. \n 'queue print' to print out all records in the queue.\n "
+   end
+
+end
+
+end
+# def show_help(input)
+#  parts = input.split
+#  command = parts[0]
+#  case command
+#  when 'load' then puts "Enter 'load <filename.csv>' to load records from a new file."
+#  when 'find' then puts "Enter 'find <attribute> <criteria>' to load records into the Queue. \n Example: 'find first_name sarah' "
+#  when 'queue' then puts "Enter 'queue print' to print the queue. \n Enter 'queue clear' to clear the queue. \n"
+#  else 
+#    puts "What would you like help with? \n 'load <filename.csv'> to input records\n 'find first_name sarah' to find people named sarah. \n 'queue print' to print out all records in the queue.\n "
+#  end
+# end
 
 
  def run
@@ -208,7 +149,11 @@ end
     #when 'load' then define_file_name(parts[-1])
     when 'find' then find(parts[1..-1].join(" "))
     when 'queue' then queue(parts[1..-1].join(" "))
-    when 'help' then show_help(parts[1..-1].join(" "))
+    when 'help' 
+      #show_help(parts[1..-1].join(" "))
+      a = HelpText.new
+      a.show_help(parts[1..-1].join(" "))
+
     else
      puts "Sorry, I don't know how to #{command}."
     end
