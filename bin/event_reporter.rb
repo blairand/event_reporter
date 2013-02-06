@@ -1,4 +1,5 @@
 require_relative 'save_to'
+require_relative 'load_new_file'
 
 require 'csv'
 require 'date'
@@ -9,7 +10,7 @@ class EventReporter
     @people = []
     @list = []
     @queue = []
-    @contents = ""#CSV.open('event_attendees.csv', headers: true, header_converters: :symbol )
+    @contents = ""
   end
 
   def clean_zipcode(zipcode)
@@ -38,6 +39,22 @@ class EventReporter
   def clean_reg_date
     #cleanup the reg date?
   end
+
+  def clean_street(dirty_street)
+    dirty_street.to_s.downcase
+  end
+
+  def clean_email(dirty_email)
+    dirty_email.downcase
+  end
+
+  def clean_last_name(dirty_last_name)
+    dirty_last_name.to_s.downcase
+  end
+
+  def clean_first_name(dirty_first_name)
+    dirty_first_name.to_s.downcase
+  end
   
 
   def parse_file(filename)
@@ -46,11 +63,11 @@ class EventReporter
       person = {}
       person[:id] = row[0]
       person[:regdate] = row[:regdate]
-      person[:first_name] = row[:first_name].to_s.downcase
-      person[:last_name] = row[:last_name].to_s.downcase
-      person[:email] = row[:email_address].to_s.downcase
+      person[:first_name] = clean_first_name(row[:first_name])
+      person[:last_name] = clean_last_name(row[:last_name])
+      person[:email] = clean_email(row[:email_address])
       person[:phone] = clean_phone(row[:homephone])
-      person[:street] = row[:street]
+      person[:street] = clean_street(row[:street])
       person[:city] = clean_city(row[:city])
       person[:state] = clean_state(row[:state])
       person[:zipcode] = clean_zipcode(row[:zipcode])
@@ -73,9 +90,24 @@ class EventReporter
     parse_file(filename)
   end
 
-  def print_queue(input)    
+  def queue_print(input)    
     header = "LAST NAME  FIRST NAME  EMAIL  ZIPCODE  CITY  STATE  ADDRESS  PHONE"
     if input == "print"
+      # @queue.max do |person|
+      # id_ljust = person[:id]
+      # person[:regdate]
+      # person[:first_name]
+      # person[:last_name]
+      # person[:email]
+      # person[:phone]
+      # person[:street]
+      # person[:city]
+      # person[:state]
+      # person[:zipcode] 
+
+      # end
+
+
       puts header
       @queue.each do |person|
         puts "#{person[:last_name].ljust(10," ")}\t #{person[:first_name].ljust(5," ")}\t #{person[:email].ljust(42," ")}\t #{person[:zipcode]}\t#{person[:city].ljust(26," ")}\t#{person[:state].upcase}\t#{person[:street].to_s.ljust(20," ")}\t#{person[:phone]}"
@@ -90,24 +122,6 @@ class EventReporter
     puts "\n\n\n\n"
   end
 
-def save_to(input,queue)
-  if input == "event_attendees.csv" || input == "save"
-    puts "cannot overwrite event_attendees.csv... saving to default_file.csv"    
-    filename = 'default_file.csv'
-  elsif input[-4..-1] ==".csv"
-    filename = input  
-  else
-    filename = "#{input}.csv"
-  end
-    CSV.open(filename, "wb") do |file|
-        file << %w"id regdate first_name last_name email_address homephone street city state zipcode"         
-        queue.each do |person|
-          file << [person[:id],person[:regdate],person[:first_name].capitalize,person[:last_name].capitalize,person[:email],person[:phone],person[:street],person[:city].capitalize,person[:state].upcase,person[:zipcode]]           
-        end          
-    end
-    puts "Queue Saved to #{filename}"
-end
-
   def queue(input)
     parts = input.split
     command = parts[0]
@@ -116,7 +130,7 @@ end
     when 'clear' 
     puts "Queue Cleared..."
     @queue = []
-    when 'print' then print_queue(parts[-1])
+    when 'print' then queue_print(parts[-1])
     when 'save' then SaveTo.new(parts[-1],@queue)
     # when 'save' then save_to(parts[-1],@queue)  
     when 'print by' then puts 'puts print by last name'
@@ -154,7 +168,7 @@ def find(input)
   parts = input.split
   command = parts[0]
   case command
-  # when 'help' then puts "\n Run 'queue count' to show number of items in queue. \n Run 'queue clear' to clear the items in the queue."
+  #when 'help' then puts "\n Run 'queue count' to show number of items in queue. \n Run 'queue clear' to clear the items in the queue."
   when 'first_name' then find_first_name(parts[1..-1].join(" ")) #find first_name mary
   when 'last_name' then find_last_name(parts[1..-1].join(" ")) #find last_name smith
   when 'phone' then puts "puts phone"
@@ -178,6 +192,7 @@ def show_help(input)
  end
 end
 
+
  def run
   command = ""
   while command != "quit"
@@ -187,7 +202,10 @@ end
     command = parts[0]
     case command
     when 'quit' then puts "Goodbye!"
-    when 'load' then define_file_name(parts[-1])
+    when 'load' 
+      @people = LoadNewFile.new(parts[-1])
+      @people = @people.returner
+    #when 'load' then define_file_name(parts[-1])
     when 'find' then find(parts[1..-1].join(" "))
     when 'queue' then queue(parts[1..-1].join(" "))
     when 'help' then show_help(parts[1..-1].join(" "))
