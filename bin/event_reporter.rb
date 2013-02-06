@@ -3,6 +3,7 @@ require_relative 'load_new_file'
 
 require 'csv'
 require 'date'
+require 'gyoku'
 
 class EventReporter
 
@@ -89,38 +90,37 @@ def find(input)
   end
 end
 
-class HelpText
-  def initialize
-   @command = ""
-  end
+                  class HelpText
+                    def initialize
+                     @command = ""
+                    end
 
-def help_queue(input)
-   parts = input.split
-    @command = parts[0]
-   case @command
-   when 'count' then puts "\n\n\n\n\tHelp Queue Count 'queue print' to print the queue. \n Enter 'queue clear' to clear the queue. \n"
-   when 'clear' then puts "\n\n\n\n\tEnter 'queue print' to print the queue. \n Enter 'queue clear' to clear the queue. \n"
-   when 'print' then puts "\n\n\n\nEnter 'queue print' to print the queue. \n Enter 'queue clear' to clear the queue. \n"
-   else
-end
-end
+                  def help_queue(input)
+                     parts = input.split
+                      @command = parts[0]
+                     case @command
+                     when 'count' then puts "\n\n\n\n\tHelp Queue Count 'queue print' to print the queue. \n Enter 'queue clear' to clear the queue. \n"
+                     when 'clear' then puts "\n\n\n\n\tEnter 'queue print' to print the queue. \n Enter 'queue clear' to clear the queue. \n"
+                     when 'print' then puts "\n\n\n\nEnter 'queue print' to print the queue. \n Enter 'queue clear' to clear the queue. \n"
+                     else
+                  end
+                  end
 
 
-  def show_help(input) 
-    parts = input.split
-    @command = parts[0]
-   case @command
-   when 'load' then puts "Enter 'load <filename.csv>' to load records from a new file."
-   when 'find' then puts "Enter 'find <attribute> <criteria>' to load records into the Queue. \n Example: 'find first_name sarah' "
-   when 'queue' 
-    help_queue(parts[1..-1].join(" "))
-   else 
-     puts "#{'-'*100}\n\n\n\nWhat would you like help with? \n\tload <filename.csv'> to input records\n\t Enter 'find first_name sarah' to find people named sarah. \n 'queue print' to print out all records in the queue.\n "
-   end
+                    def show_help(input) 
+                      parts = input.split
+                      @command = parts[0]
+                     case @command
+                     when 'load' then puts "Enter 'load <filename.csv>' to load records from a new file."
+                     when 'find' then puts "Enter 'find <attribute> <criteria>' to load records into the Queue. \n Example: 'find first_name sarah' "
+                     when 'queue' 
+                      help_queue(parts[1..-1].join(" "))
+                     else 
+                       puts "#{'-'*100}\n\n\n\nWhat would you like help with? \n\tload <filename.csv'> to input records\n\t Enter 'find first_name sarah' to find people named sarah. \n 'queue print' to print out all records in the queue.\n "
+                     end
+                    end
 
-end
-
-end
+                  end
 # def show_help(input)
 #  parts = input.split
 #  command = parts[0]
