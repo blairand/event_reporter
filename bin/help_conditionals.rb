@@ -1,4 +1,16 @@
 ---
 help:
-  load: "this is the help for load"
-  find: "this is the help for find"
+  load: "Type 'load <filename>' to load records from the <filename>"
+  quit:  "DON'T BE A QUITTER!!!!"
+  queue: "Here are some things in the queue."
+  count: "Type 'Queue Count' to show the number of attendees in the Queue."
+  clear: "Type 'Queue Clear' to clear the queue."
+  print: "Type 'Queue Print' to print the items in the queue onto the screen."
+  print: "Type 'Queue Print by <attribute>' to print the items in the queue sorted by the <attribute>."
+  save: "Type 'Queue Save to <filename>.<extension>' to save. accepts JSON, CSV, XML extensions."
+  find: "Type 'find <attribute> <criteria>' to find a group of records..."
+  first_name: "Finds Records matching the first_name criteria"
+  last_name: "Finds Records matching the last_name criteria"
+  state: "finds Records matching the state criteria"
+  city: "Finds Records matching the city criteria"
+  zipcode: "Finds Records matching the zipcode criteria"

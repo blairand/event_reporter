@@ -14,19 +14,39 @@ class EventReporter
     @contents = ""
   end
 
-  def queue_print(input)    
-    header = "LAST NAME  FIRST NAME  EMAIL  ZIPCODE  CITY  STATE  ADDRESS  PHONE"
-    if input == "print"
 
+
+
+  def queue_print(input)
+    first_name_length = [12]
+    last_name_length = [12]
+    email_length = []
+    city_length = []
+    street_length = []
+    @queue.each do |person|    
+      first_name_length << person[:first_name].length
+      last_name_length << person[:last_name].length
+      email_length << person[:email].length
+      city_length << person[:city].length
+      street_length << person[:street].length
+    end
+    first_name_ljust = first_name_length.max
+    last_name_ljust =  last_name_length.max
+    email_ljust = email_length.max
+    city_ljust =  city_length.max
+    street_ljust = street_length.max
+
+    header = "#{"LAST NAME".ljust(last_name_ljust," ")}|#{"FIRST NAME".ljust(first_name_ljust)}|#{"EMAIL".ljust(email_ljust)}|#{"ZIPCODE".ljust(10," ")}|#{"CITY".ljust(city_ljust," ")}|#{"STATE".ljust(5," ")}|#{"ADDRESS".ljust(street_ljust," ")}|#{"PHONE".ljust(13," ")}"
+    if input == "print"
       puts header
       @queue.each do |person|
-        puts "#{person[:last_name].ljust(10," ")}\t #{person[:first_name].ljust(5," ")}\t #{person[:email].ljust(42," ")}\t #{person[:zipcode]}\t#{person[:city].ljust(26," ")}\t#{person[:state].upcase}\t#{person[:street].to_s.ljust(20," ")}\t#{person[:phone]}"
+        puts "#{person[:last_name].ljust(last_name_ljust," ")}|#{person[:first_name].ljust(first_name_ljust," ")}|#{person[:email].ljust(email_ljust," ")}|#{person[:zipcode].ljust(10," ")}|#{person[:city].ljust(city_ljust," ")}|#{person[:state].upcase.ljust(5," ")}|#{person[:street].to_s.ljust(street_ljust," ")}|#{person[:phone].ljust(13," ")}"
       end
     else
       puts header
       sorted = @queue.sort_by{|person| person[input.to_sym]}
       sorted.each do |person|
-        puts "#{person[:last_name].ljust(15," ")}\t #{person[:first_name].ljust(5," ")}\t #{person[:email].ljust(42," ")}\t #{person[:zipcode]}\t#{person[:city].ljust(26," ")}\t#{person[:state]}\t#{person[:street].to_s.ljust(20," ")}\t#{person[:phone]}"
+        puts "#{person[:last_name].ljust(queue_lengths[:last_name_bucket]," ")} #{person[:first_name].ljust(queue_lengths[:first_name_bucket]," ")} #{person[:email].ljust(queue_lengths[:email_bucket]," ")} #{person[:zipcode].ljust(7," ")} #{person[:city].ljust(queue_lengths[:city_bucket]," ")} #{person[:state].upcaseljust(5," ")} #{person[:street].to_s.ljust(queue_lengths[:street_bucket]," ")} #{person[:phone]}"
       end
     end
     puts "\n\n\n\n"
@@ -43,7 +63,6 @@ class EventReporter
     when 'print' then queue_print(parts[-1])
     when 'save' then SaveTo.new(parts[-1],@queue)
     # when 'save' then save_to(parts[-1],@queue)  
-    when 'print by' then puts 'puts print by last name'
     else
       puts "What would you like to queue?"
     end
@@ -116,7 +135,10 @@ end
                      when 'queue' 
                       help_queue(parts[1..-1].join(" "))
                      else 
-                       puts "#{'-'*100}\n\n\n\nWhat would you like help with? \n\tload <filename.csv'> to input records\n\t Enter 'find first_name sarah' to find people named sarah. \n 'queue print' to print out all records in the queue.\n "
+                       puts "#{'-'*100}\n\n\n\n\t\tWelcome to Event Reporter. \n\n\n\n\t\tYou can Search a CSV for specific names/cities/states/zipcodes and print them  
+                       \n\tType 'load <filename.csv>'' to load records\n\t Enter 'find first_name sarah' to find people named sarah. 
+                       \n Type 'queue print' to print out all records in the queue.\n Type 'queue print by <attribute> to sort the data by an attribute\n
+                       Type 'queue save to filename' to save the queue, JSON, XML, txt and CSV are acceptable extensions."
                      end
                     end
 
@@ -144,6 +166,7 @@ end
     case command
     when 'quit' then puts "Goodbye!"
     when 'load' 
+      @queue = []
       @people = LoadNewFile.new(parts[-1])
       @people = @people.returner
     #when 'load' then define_file_name(parts[-1])

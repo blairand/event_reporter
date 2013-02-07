@@ -52,7 +52,7 @@ class LoadNewFile
   end
 
   def clean_email(dirty_email)
-    dirty_email.downcase
+    dirty_email.to_s.downcase
   end
 
   def clean_last_name(dirty_last_name)
